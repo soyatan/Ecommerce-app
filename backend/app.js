@@ -1,21 +1,26 @@
 const express = require("express");
 const app = express();
-require("dotenv/config");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
-const Product = require("./models/product");
-const api = process.env.API_URL;
+const cors = require("cors");
+require("dotenv/config");
 
-const productsRouter = require("./routers/products");
+app.use(cors());
+app.options("*", cors());
 
 app.use(express.json());
 app.use(morgan("tiny"));
+
+const productsRouter = require("./routers/products");
+
+const api = process.env.API_URL;
 
 app.use(`${api}/products`, productsRouter);
 
 mongoose
   .connect(process.env.CONNECTION_STRING, {
     useNewUrlParser: true,
+    useUnifiedTopology: true,
   })
   .then(() => {
     console.log("database conneksiyon ready");
@@ -24,6 +29,6 @@ mongoose
     console.log(err);
   });
 
-app.listen(3000, () => {
+app.listen(4000, () => {
   console.log("listening on port 3000");
 });
