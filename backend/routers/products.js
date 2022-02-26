@@ -3,6 +3,20 @@ const express = require("express");
 const { Category } = require("../models/category");
 const router = express.Router();
 const mongoose = require("mongoose");
+const multer = require("multer");
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "/public/uploads");
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, file.fieldname + "-" + uniqueSuffix);
+  },
+});
+const uploadOptions = multer({
+  storage: storage,
+});
 
 router.get(`/`, async (req, res) => {
   let filter = {};
@@ -29,7 +43,7 @@ router.get("/:id", async (req, res) => {
   }
   res.status(200).send(product);
 });
-router.post(`/`, async (req, res) => {
+router.post(`/`, uploadOptions.single("image"), async (req, res) => {
   const category = await Category.findById(req.body.category);
   if (!category) {
     return res.status(400).send("Invalid Category");
